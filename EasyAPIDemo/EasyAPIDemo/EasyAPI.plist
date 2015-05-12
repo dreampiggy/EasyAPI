@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>API List</key>
+	<dict>
+		<key>foo</key>
+		<dict>
+			<key>URL</key>
+			<string>http://www.dreampiggy.com/foo</string>
+			<key>Method</key>
+			<string>GET</string>
+		</dict>
+	</dict>
+	<key>UpdateURL</key>
+	<string>http://www.dreampiggy.com/update</string>
+</dict>
+</plist>
