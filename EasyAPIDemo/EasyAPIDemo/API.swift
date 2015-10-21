@@ -35,23 +35,25 @@ public class EasyAPI{
         }
     }
     
-    func sendAPI(tag: String, param:String...) -> Bool{
+    func sendAPI(tag: String, path:String = "", body:String = "", param:String...) -> Bool{
         //发送API，要确保APIParameter数组按照API Info.plist表中规定的先后顺序
         if (apiList == nil){
             return false
         }
         if let apiName = apiList?[tag] as? NSDictionary{
-            let apiURL = apiName["URL"] as? String ?? ""
+            let templateURL = apiName["URL"] as? String ?? ""
+            let apiURL = String(format: templateURL, path)
+            
             let apiMethod = apiName["Method"] as? String ?? "GET"
+            
             let apiParamArray = apiName["Param"] as? [String] ?? []//从API列表中读到的参数列表
             var apiParameter = param//方法调用的传入参数列表
             
+            let apiBody = apiName["Body"] as? String ?? ""
+            
             if (apiParamArray.count == apiParameter.count){
-                var apiParamDic:NSDictionary?
-                if !(apiParamArray.isEmpty){
-                    apiParamDic = NSDictionary(objects: apiParameter, forKeys: apiParamArray)//将从plist属性表中的读取到的参数数的值作为key，将方法传入的参数作为value，传入要发送的参数字典
-                }
-                self.postRequest(apiMethod, url: apiURL, parameter: apiParamDic, tag: tag)
+                let apiParamDic = NSDictionary(objects: apiParameter, forKeys: apiParamArray)//将从plist属性表中的读取到的参数数的值作为key，将方法传入的参数作为value，传入要发送的参数字典
+                self.postRequest(apiMethod, url: apiURL, parameter: apiParamDic, body: apiBody, tag: tag)
                 return true
             }
         }
@@ -80,7 +82,7 @@ public class EasyAPI{
     }
     
     //POST请求，接收MIME类型为text/html，只处理非JSON返回格式的数据
-    func postRequest(method: String, url: String, parameter: NSDictionary?,tag: String)
+    func postRequest(method: String, url: String, parameter: NSDictionary, body:String = "", tag: String)
     {
         let requestMethod:Alamofire.Method
 
@@ -96,30 +98,50 @@ public class EasyAPI{
         default:
             requestMethod = Alamofire.Method.GET
         }
-        Alamofire.request(requestMethod, url, parameters: parameter as? [String : AnyObject] ?? nil)
-            .response { (request, response, data, error) in
-                if (error != nil){
+        
+        var request = Alamofire.request(requestMethod, url, parameters: parameter as? [String : String] ?? nil)
+        if body != "" {
+            var baseURL = url
+            var query = "?"
+            for key in parameter.allKeys {
+                let k = key as! String
+                let v = parameter.objectForKey(key) as? String ?? ""
+                query += "\(k)=\(v)&"
+            }
+            baseURL = baseURL + (query.hasSuffix("&") ?
+                query.substringToIndex(advance(query.endIndex, -1)) : query)
+            let URL = NSURL(string: baseURL.stringByAddingPercentEscapesUsingEncoding(NSUTF8StringEncoding)!)
+            if (URL == nil) { return }
+            
+            let mutableURLRequest = NSMutableURLRequest(URL: URL!)
+            mutableURLRequest.HTTPMethod = method
+            mutableURLRequest.HTTPBody = NSData(contentsOfFile: body)
+            
+            request = Alamofire.request(mutableURLRequest)
+        }
+        
+        request.response { (request, response, data, error) in
+            if (error != nil){
+                self.didReceiveError(response?.statusCode ?? 500, error: error ?? NSError(), tag: tag)
+            }
+            if let receiveData = data as? NSData{
+                //按照NSDictionary -> NSArray -> NSString的顺序进行过滤
+                if let receiveDic = NSJSONSerialization.JSONObjectWithData(receiveData, options: NSJSONReadingOptions.MutableContainers, error: nil) as? NSDictionary{
+                    println("\nResponse(Dictionary):\n\(receiveDic)\n***********\n")
+                    self.didReceiveResults(receiveDic, tag: tag)
+                }
+                else if let receiveArray = NSJSONSerialization.JSONObjectWithData(receiveData, options: NSJSONReadingOptions.MutableContainers, error: nil) as? NSArray{
+                    println("\nResponse(Array):\n\(receiveArray)\n***********\n")
+                    self.didReceiveResults(receiveArray, tag: tag)
+                }
+                else if let receiveString = NSString(data: receiveData,encoding: NSUTF8StringEncoding){
+                    println("\nResponse(String):\n\(receiveString)\n***********\n")
+                    self.didReceiveResults(receiveString, tag: tag)
+                }//默认使用UTF-8编码
+                else{
                     self.didReceiveError(response?.statusCode ?? 500, error: error ?? NSError(), tag: tag)
                 }
-                if let receiveData = data as? NSData{
-                    //按照NSDictionary -> NSArray -> NSString的顺序进行过滤
-                    if let receiveDic = NSJSONSerialization.JSONObjectWithData(receiveData, options: NSJSONReadingOptions.MutableContainers, error: nil) as? NSDictionary{
-                        println("\nResponse(Dictionary):\n\(receiveDic)\n***********\n")
-                        self.didReceiveResults(receiveDic, tag: tag)
-                    }
-                    else if let receiveArray = NSJSONSerialization.JSONObjectWithData(receiveData, options: NSJSONReadingOptions.MutableContainers, error: nil) as? NSArray{
-                        println("\nResponse(Array):\n\(receiveArray)\n***********\n")
-                        self.didReceiveResults(receiveArray, tag: tag)
-                    }
-                    else if let receiveString = NSString(data: receiveData,encoding: NSUTF8StringEncoding){
-                        println("\nResponse(String):\n\(receiveString)\n***********\n")
-                        self.didReceiveResults(receiveString, tag: tag)
-                    }//默认使用UTF-8编码
-                    else{
-                        self.didReceiveError(response?.statusCode ?? 500, error: error ?? NSError(), tag: tag)
-                    }
-                }
-            
+            }
         }
     }
     

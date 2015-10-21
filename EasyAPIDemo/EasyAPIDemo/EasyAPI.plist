@@ -7,9 +7,22 @@
 		<key>foo</key>
 		<dict>
 			<key>URL</key>
-			<string>http://www.dreampiggy.com/foo</string>
+			<string>http://www.%@.com</string>
 			<key>Method</key>
 			<string>GET</string>
+		</dict>
+		<key>bar</key>
+		<dict>
+			<key>URL</key>
+			<string>http://cn.bing.com/search</string>
+			<key>Method</key>
+			<string>POST</string>
+			<key>Body</key>
+			<string>Test body</string>
+			<key>Param</key>
+			<array>
+				<string>q</string>
+			</array>
 		</dict>
 	</dict>
 	<key>UpdateURL</key>

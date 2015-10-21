@@ -1,6 +1,6 @@
 # EasyAPI
 
-一个超级简单的，用XML列表来调用Web API。使用Swift语言。
+一个超级简单的，用XML列表来调用Web API。暂时使用Swift 1.2。
 
 ---
 
@@ -12,7 +12,7 @@
 
 ```swift
 EasyAPI.send("foo")
-EasyAPI.send("bar", param: "hello")
+EasyAPI.send("bar", body: "Test" param: "hello")
 
 func getResult(tag: String, result: AnyObject) {
 	println(results)//result的类型将根据API请求结果而定，有字典、数组和字符串
@@ -38,7 +38,7 @@ func getError(tag: String, error: NSError, statusCode: Int)
 
 -
 # 导入项目
-
+双击.xcworkspace即可，引用Alamofire作为动态链接库
 
 -
 # XML列表格式
@@ -69,6 +69,8 @@ func getError(tag: String, error: NSError, statusCode: Int)
 			<array>
 				<string>msg</string>
 			</array>
+			<key>Body</key>
+			<string>Test Body</string>
 		</dict>
 	</dict>
 	<key>UpdateURL</key>
@@ -83,6 +85,14 @@ func getError(tag: String, error: NSError, statusCode: Int)
 + `EasyAPI.send(tag: String, param:String...) -> Bool`
 
 发送一个网络请求，tag为EasyAPI.plist中的API List的键一一对应。如果指定tag的请求已经存在且未完成，前一个请求会被取消。参数列表也与EasyAPI.plist中的列表顺序一一对应。如果参数列表不匹配，该请求将不会被发送，方法返回`false`，且`getError()`会被调用。
+
++ `EasyAPI.send(tag: String, path:String, param:String...) -> Bool`
+
+可以定义URL的模版，用String的模版，比如`"http://www.%@.com",path = "baidu"`可以生成`"http://www.baidu.com"`的URL，使用URLEncode，path默认为空
+
++ `EasyAPI.send(tag: String, body:String param:String...) -> Bool`
+
+允许自定义Body，使用URLEncode，仅限POST请求，注意此时如果还有`param`参数，将把`param`加入`URL Query`而并非Alamofire自带的放入Body内
 
 + `EasyAPI.cancel(tag: String) -> void`
 

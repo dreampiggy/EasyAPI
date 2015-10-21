@@ -21,16 +21,24 @@
                                 <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                             </webView>
+                            <activityIndicatorView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" hidesWhenStopped="YES" animating="YES" style="gray" translatesAutoresizingMaskIntoConstraints="NO" id="1AN-3o-1VL">
+                                <rect key="frame" x="16" y="290" width="568" height="20"/>
+                            </activityIndicatorView>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
                         <constraints>
                             <constraint firstItem="wfy-db-euE" firstAttribute="top" secondItem="UeM-Rd-gtM" secondAttribute="bottom" id="7x7-Ah-kwl"/>
+                            <constraint firstAttribute="centerX" secondItem="1AN-3o-1VL" secondAttribute="centerX" id="9Oa-OH-tdD"/>
                             <constraint firstAttribute="trailingMargin" secondItem="UeM-Rd-gtM" secondAttribute="trailing" constant="-16" id="I9H-UA-ikE"/>
+                            <constraint firstAttribute="trailingMargin" secondItem="1AN-3o-1VL" secondAttribute="trailing" id="OlX-K0-jhp"/>
                             <constraint firstItem="UeM-Rd-gtM" firstAttribute="top" secondItem="y3c-jy-aDJ" secondAttribute="bottom" constant="-20" id="P4t-VX-CL7"/>
                             <constraint firstItem="UeM-Rd-gtM" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leadingMargin" constant="-16" id="aaL-Zn-uOI"/>
+                            <constraint firstAttribute="centerY" secondItem="1AN-3o-1VL" secondAttribute="centerY" id="ade-v0-gKc"/>
+                            <constraint firstItem="1AN-3o-1VL" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leadingMargin" id="cbp-Qd-G8x"/>
                         </constraints>
                     </view>
                     <connections>
+                        <outlet property="indicator" destination="1AN-3o-1VL" id="UAY-gu-NTC"/>
                         <outlet property="webView" destination="UeM-Rd-gtM" id="wvW-Dc-SUD"/>
                     </connections>
                 </viewController>
